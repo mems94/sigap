@@ -2,8 +2,9 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\EmployeeController;
+use App\Models\Employee;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,15 +17,17 @@ use App\Http\Controllers\HomeController;
 |
 */
 
-Route::get('/', function () {
-    return view('auth.login');
-})->middleware('guest');
+Route::get('/', [HomeController::class, 'login'])->middleware('guest');
 
 Route::prefix('editor')->name('editor.')->middleware('auth')->group(function() {
     Route::resource('employee', EmployeeController::class);
+    Route::get('/contracts_list/{contract}', [EmployeeController::class, 'listContracts'])->name('contracts.list');
+    Route::get('/print', [EmployeeController::class, 'print'])->name('print');
 });
 
 Auth::routes();
 
-Route::get('/register', [HomeController::class, 'register'])->name('registration');
+Route::get('/registration', [HomeController::class, 'create'])->name('registration');
 Route::get('/users', [HomeController::class, 'index'])->name('users');
+Route::delete('/delete_user', [HomeController::class, 'delete'])->name('delete_user');
+

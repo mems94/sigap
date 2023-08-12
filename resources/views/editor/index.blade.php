@@ -6,6 +6,8 @@
     $nextClassAdvancement = '-';
     $pos = 0;
 
+    // dd($employees[0]->contracts[0]->avenants[0]->avenantNumber);
+
 @endphp
 
 @extends('layouts.app')
@@ -17,8 +19,8 @@
 
         <div class="text-center rounded-3">
             <form action="" method="get" class= "container d-flex gap-2">
-                <input class="form-control" type="text" name="lastName" id="lastName" placeholder="Entrer un nom" value="{{ $inputForSearch['lastName'] ?? '' }}">
-                <input class="form-control" type="number" name="im" id="im" placeholder="Entrer un IM" value="{{ $inputForSearch['im'] ?? '' }}">
+                <input class="form-control" type="text" name="lastName" id="lastName" placeholder="Rechercher un nom" value="{{ $inputForSearch['lastName'] ?? '' }}">
+                <input class="form-control" type="number" name="im" id="im" placeholder="Rechercher un IM" value="{{ $inputForSearch['im'] ?? '' }}">
                 <button>
                     <i class="bi bi-search fs-3 text-primary mx-3"></i>
                 </button>
@@ -26,9 +28,9 @@
         </div>
         
         <div>
-            <a href="#" tooltip="Imprimer pour tous les employés"><i class="bi bi-printer-fill fs-1 text-primary mx-3"></i></a>
+            <a href="#" type="button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Imprimer pour tous les employés"><i class="bi bi-printer-fill fs-1 text-primary mx-3"></i></a>
             
-            @can('update', Employee::class)
+            @can('create', Auth::user())
                 <a href="{{ route('editor.employee.create') }}"><i class="bi bi-plus-circle-fill fs-1 text-primary"></i></a>
             @endcan
 
@@ -53,7 +55,7 @@
                         <th class="fw-bold">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="align-middle">
                     @forelse ($employees as $employee)
                         @php
                         /**
@@ -62,44 +64,44 @@
                             $pos = $pos + 1;
                         @endphp
                         <tr>
-                            <td>{{ $pos }}</td>
+                            <td> {{ $pos }}</td>
                             <td> {{ $employee->lastName }}</td>
                             <td> {{ $employee->firstName }}</td>
                             <td> {{ $employee->im }}</td>
-                            <td> {{ $employee->contract?->contractNumber }}</td>
+                            <td> {{ $employee->contracts[0]->contractNumber }}<a href="{{ route('editor.contracts.list', $employee->contracts[0]) }}"><i class="bi bi-list-ul fs-4 text-primary mx-2"></i></a></td>
 
                             <td> {{ Carbon::parse($employee->contract?->startDate)->format('d-m-Y') }}</td>
-                            <td> {{ $employee->advancement?->class }}</td>
+                            <td> {{ $employee->advancements[0]->class }}</td>
 
                             @php
                             /** 
                              * Advancement evolution rules
                              * Check for echelon below
                             */
-                                if (!$employee->contract->avenant[0]->avenantNumber) {
-                                    $nextClassAdvancement = Carbon::parse($employee->contract->startDate)->addYear();
+                                if (!$employee->contracts[0]->avenants[0]?->avenantNumber) {
+                                    $nextClassAdvancement = Carbon::parse($employee->contracts[0]->startDate)->addYear();
                                 } else {
-                                    $nextClassAdvancement = Carbon::parse($employee->contract->avenant[0]->date)->addYears(3);
+                                    $nextClassAdvancement = Carbon::parse($employee->contracts[0]->avenants[0]->date)->addYears(3);
                                 }  
-                                $nextEchelonAdvancement = Carbon::parse($employee->contract?->startDate)->addYear();
+                                $nextEchelonAdvancement = Carbon::parse($employee->contracts[0]->startDate)->addYear();
                             @endphp
 
-                            <td @if ($nextClassAdvancement->diffInDays(Carbon::now()) <= 5)
+                            <td @if ($nextClassAdvancement->diffInMonths(Carbon::now()) <= 2)
                                     class = "bg-danger text-white"
                                 @endif > {{ $nextClassAdvancement->format('d-m-Y') }}
                             </td>
 
-                            <td>{{ $employee->advancement?->echelon }} </td>
+                            <td>{{ $employee->advancements[0]->echelon }} </td>
 
-                            <td @if ($nextEchelonAdvancement->diffInDays(Carbon::now()) <= 5)
+                            <td @if ($nextEchelonAdvancement->diffInMonths(Carbon::now()) <= 2)
                                     class = "bg-danger text-white"
                                 @endif >
                                 {{ $nextEchelonAdvancement->format('d-m-Y') }}
                             </td>
 
-                            <td @if (Carbon::parse($employee->contract->endDate)->diffInDays(Carbon::now()) <= 5)
+                            <td @if (Carbon::parse($employee->contracts[0]->endDate)->diffInDays(Carbon::now()) <= 5)
                                     class="bg-danger text-white"
-                                @endif > {{ Carbon::parse($employee->contract->endDate)->format('d-m-Y') }}
+                                @endif > {{ Carbon::parse($employee->contracts[0]->endDate)->format('d-m-Y') }}
                             </td>
                             
                             <td>

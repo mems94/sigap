@@ -12,14 +12,14 @@ class EmployeePolicy
     /**
      * Rules to give full acceess to admin
      */
-    // public function before(User $user, string $ability)
-    // {
-    //     if($user->isAdministrator()) {
-    //         return true;
-    //     }
+    public function before(User $user, string $ability)
+    {
+        if($user->isAdministrator()) {
+            return true;
+        }
 
-    //     return null;
-    // }
+        return null;
+    }
 
     /**
      * Determine whether the user can view any models.
@@ -51,7 +51,7 @@ class EmployeePolicy
      */
     public function update(User $user, Employee $employee): bool
     {
-        return ($user->role === 'editor' || $user->role === 'admin');
+        return ($user->role == 'editor' || $user->role == 'admin');
     }
 
     /**
@@ -59,22 +59,22 @@ class EmployeePolicy
      */
     public function delete(User $user, Employee $employee): bool
     {
-        return ($user->role === 'editor' || $user->role === 'admin');
+        return ($user->role == 'editor' || $user->role == 'admin');
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Employee $employee): bool
-    {
-        //
-    }
+    // public function restore(User $user, Employee $employee): bool
+    // {
+    //     //
+    // }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Employee $employee): bool
-    {
-        //
-    }
+    // public function forceDelete(User $user, Employee $employee): bool
+    // {
+    //     //
+    // }
 }

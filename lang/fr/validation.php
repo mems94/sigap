@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 return [
+    '403' => 'Cette action est non autorisée.',
     'accepted'             => 'Le champ :attribute doit être accepté.',
     'accepted_if'          => 'Le champ :attribute doit être accepté quand :other a la valeur :value.',
     'active_url'           => 'Le champ :attribute n\'est pas une URL valide.',
@@ -148,7 +149,8 @@ return [
         'category'                 => 'categorie',
         'contractNumber'           => 'numero de contrat',
         'contractType'             => 'type de contrat',
-        'projectContractFile_path'  => 'fichier de projet de contract',
+        'projectContractFilePath'  => 'fichier de projet de contract',
+        'avenantFile'              => 'Fichier d\'avenant',
         'lastDegree'               => 'dernier diplome',
         'address'                  => 'addresse',
         'firstName'                => 'prenom',

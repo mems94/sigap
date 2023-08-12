@@ -40,13 +40,13 @@ class EmployeeFormRequest extends FormRequest
             //For contract table
             'contractNumber' => ['required', 'string'],
             'contractType' => ['required', 'string'],
-            'startDate' => ['required'],
-            'endDate' => ['required'],
+            'startDate' => ['required', 'date_format:d-m-Y'],
+            'endDate' => ['required', 'date_format:d-m-Y'],
             'projectContractFilePath' => ['required', 'image'],
 
             //For avenants table
             'avenantNumber' => ['string', 'nullable'],
-            'date' => ['nullable'],
+            'date' => ['nullable', 'date_format:d-m-Y'],
             'avenantFilePath' => ['image', 'nullable']
         ];
     }

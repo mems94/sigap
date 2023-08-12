@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Avenant;
 use App\Models\Contract;
 use App\Models\Employee;
 use Illuminate\View\View;
 use App\Models\Advancement;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\SearchFormRequest;
@@ -15,7 +17,6 @@ use App\Http\Requests\EmployeeFormRequest;
 
 class EmployeeController extends Controller
 {
-
     public function __construct()
     {
         $this->authorizeResource(Employee::class, 'employee');
@@ -25,8 +26,8 @@ class EmployeeController extends Controller
      */
     public function index(SearchFormRequest $request)
     {
-        $employeesQuery = Employee::query()->with('contract', 'advancement')->orderBy('created_at', 'desc');
-        
+        $employeesQuery = Employee::query()->with('contracts', 'advancements')->orderBy('created_at', 'desc');
+
         //For lastname search
         if ($request->validated('lastName')){
             $employeesQuery = $employeesQuery->where('lastName', 'like', "%{$request->validated('lastName')}%");
@@ -62,8 +63,9 @@ class EmployeeController extends Controller
             'contract' => $contract,
             'avenant' => $avenant,
             'contractOptions' => ['EFA' => 'EFA', 'ECD' => 'ECD', 'ELD' => 'ELD'],
-            'echelonOptions' => [1 => 1, 2 => 2],
-            'classOptions' => ['Stagiaire' => 'Stagiaire', 'Deuxieme' => 'Deuxieme', 'Premiere' => 'Premiere', 'Principale' => 'Principale', 'Exceptionnelle' => 'Exceptionnelle']
+            'echelonOptions' => [1 => 1, 2 => 2, 3 => 3],
+            'classOptions' => ['Stagiaire' => 'Stagiaire', 'Deuxieme' => 'Deuxieme', 'Premiere' => 'Premiere', 'Principale' => 'Principale', 'Exceptionnelle' => 'Exceptionnelle'],
+            'genderOptions' => ['Homme' => 'Homme', 'Femme' => 'Femme']
         ]);
     }
 
@@ -111,6 +113,8 @@ class EmployeeController extends Controller
         */
         $data = $this->extractProjectContractFilePath(new Contract(), new Avenant(), $request);
 
+        //Add user_id in data to avoid default_id error when creating user
+        $data['user_id'] = Auth::user()->id;
         $employee = Employee::create($data);
         $advancement = new Advancement([
             'class' => $data['class'],
@@ -122,7 +126,7 @@ class EmployeeController extends Controller
 
         //Convert date format from d-m-Y to Y-m-d ( format date taken by laravel)
         $startDate = date('Y-m-d', strtotime($data['startDate']));
-        $endDate = date('Y-m-d', strtotime( $data['startDate']));
+        $endDate = date('Y-m-d', strtotime( $data['endDate']));
 
         $contract = new Contract([
             'contractNumber' => $data['contractNumber'],
@@ -142,15 +146,15 @@ class EmployeeController extends Controller
 
 
         $employee->save();
-        $employee->advancement()->save($advancement);
+        $employee->advancements()->save($advancement);
         $advancement->refresh();
         $advancement->save();
 
-        $employee->contract()->save($contract);
+        $employee->contracts()->save($contract);
         $employee->refresh();
         $contract->save();
 
-        $contract->avenant()->save($avenant);
+        $contract->avenants()->save($avenant);
         $contract->refresh();
         $contract->save();
 
@@ -159,37 +163,33 @@ class EmployeeController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    // public function show(string $id)
-    // {
-    //     //
-    // }
-
-    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Employee $employee)
     {
         //extracting avenant associated to the contract 
-        $avenants = $employee->contract->avenant;
-        foreach ($avenants as $avenant) {
-            $associatedAvenant = new Avenant([
-                'avenantNumber' => $avenant->avenantNumber,
-                'date' => $avenant->date  
-            ]);
+        if($employee->contracts[0]->avenants[0]) {
+            $avenants = $employee->contracts[0]->avenants;
+            foreach ($avenants as $avenant) {
+                $associatedAvenant = new Avenant([
+                    'avenantNumber' => $avenant->avenantNumber,
+                    'date' => $avenant->date  
+                ]);
 
-        // dd($associatedAvenant->date);
+            }
+        } else {
+                $associatedAvenant = new Avenant();
         }
         
         return view('editor.create', [
             'employee' => $employee,
-            'advancement' => $employee->advancement,
-            'contract' => $employee->contract,
+            'advancement' => $employee->advancements[0],
+            'contract' => $employee->contracts[0],
             'avenant' => $associatedAvenant,
             'contractOptions' => ['EFA' => 'EFA', 'ECD' => 'ECD', 'ELD' => 'ELD'],
-            'echelonOptions' => [1 => 1, 2 => 2],
-            'classOptions' => ['Stagiaire' => 'Stagiaire', 'Deuxieme' => 'Deuxieme', 'Premiere' => 'Premiere', 'Principale' => 'Principale', 'Exceptionnelle' => 'Exceptionnelle']
+            'echelonOptions' => [1 => 1, 2 => 2, 3 => 3],
+            'classOptions' => ['Stagiaire' => 'Stagiaire', 'Deuxieme' => 'Deuxieme', 'Premiere' => 'Premiere', 'Principale' => 'Principale', 'Exceptionnelle' => 'Exceptionnelle'],
+            'genderOptions' => ['Homme' => 'Homme', 'Femme' => 'Femme']
         ]);
     }
 
@@ -199,20 +199,23 @@ class EmployeeController extends Controller
     public function update(EmployeeFormRequest $request, Employee $employee, Contract $contract, Avenant $avenant)
     {
         $data = $this->extractProjectContractFilePath($contract, $avenant, $request);
-        $employee->update($data);
-        $employee->advancement->update($data);
 
-        //Formatting date to adapt to date format in database
-        // $dataToUpdate = $request->validated();
-        // $dataToUpdate['startDate'] = date('Y-m-d', strtotime($request->validated('startDate')));
-        // $dataToUpdate['endDate'] = date('Y-m-d', strtotime($request->validated('startDate')));
-        // $dataToUpdate = date('Y-m-d', strtotime( $request->validated('date')));
+        //Convert date format from d-m-Y to Y-m-d ( format date taken by laravel)
+        $data['startDate'] = date('Y-m-d', strtotime($data['startDate']));
+        $data['endDate'] = date('Y-m-d', strtotime($data['endDate']));
+        $data['date'] = date('Y-m-d', strtotime($data['date']));
+        
+        $employee->update($data);
+        // dd($employee->contracts[0]->avenant[0]);
+        $employee->advancements[0]->update($data);
 
         //Relationship to be updated
         // $employee->contract->update($request->validated());
-        $employee->contract->update($data);
+        $employee->contracts[0]->update($data);
 
-        optional($employee->contract->avenant[0])->update($data);
+        if($employee->contracts[0]->avenant) {
+            optional($employee->contracts[0]->avenant[0])->update($data);
+        }
 
         return to_route('editor.employee.index')->with("success", "L'employé a été bien mis à jour");
     }
@@ -222,9 +225,20 @@ class EmployeeController extends Controller
      */
     public function destroy(Employee $employee)
     {
-        $employee->contract->avenant[0]->delete();
+        $employee->contracts[0]->avenants[0]->delete();
         $employee->delete();
 
         return to_route('editor.employee.index')->with('success', 'L\'employé a été bien supprimé');
+    }
+
+    public function listContracts(Contract $contract)
+    {
+        $histories = DB::table('model_histories')->where('model_id', '=', $contract->id)->get();
+        return view('editor.contracts.list', ['histories' => $histories] );
+    }
+
+    public function print()
+    {
+        return view('editor.print');
     }
 }

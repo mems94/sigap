@@ -21,11 +21,10 @@
     }
     </style>
 
-    {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"> --}}
     <link rel="stylesheet" href="{{ asset('bootstrap-icons-1.10.5/font/bootstrap-icons.css') }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/fr.js"></script>
+    <link rel="stylesheet" href="{{ asset('flatpickr.min.css') }}">
+    <script src="{{ asset('flatpickr.min.js') }} "></script>
+    <script src="{{ asset('flatpickr_fr.js') }} "></script>
 
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
@@ -49,38 +48,31 @@
 
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto">
-                        <!-- Authentication Links -->
-                        @guest
-                            @if (Route::has('login'))
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
-                                </li>
-                            @endif
-
-                            {{-- @if (Route::has('register'))
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
-                                </li>
-                            @endif --}}
-                        @else
+                        @auth
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                    {{ Auth::user()->name }}
+                                    {{ Auth::user()->name }} <br>
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="#">Role : {{ Auth::user()->role}}</a>
+
+                                    @can('create', Auth::user())
+                                        <a class="dropdown-item" href="{{ route('registration') }}"> {{__('Register user')}}</a>
+                                        <a class="dropdown-item" href="{{ route('users') }}"> {{__('List users')}}</a>                       
+                                    @endcan
+                                         
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
                                         {{ __('Logout') }}
                                     </a>
-
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                         @csrf
                                     </form>
                                 </div>
                             </li>
-                        @endguest
+                        @endauth
                     </ul>
                 </div>
             </div>
@@ -95,13 +87,14 @@
         
     </div>
     <script>
-        // flatpickr.localize(flatpickr.l10ns.fr);
-        // flatpickr("#startDate", { dateFormat: "d-m-Y"});
-        flatpickr("#startDate");
-        // flatpickr("#endDate", {dateFormat: "d-m-Y"});
-        flatpickr("#endDate");
-        // flatpickr("#date", {dateFormat: "d-m-Y"});
-        flatpickr("#date");
+        flatpickr.localize(flatpickr.l10ns.fr);
+        flatpickr("#startDate", { dateFormat: "d-m-Y"});
+        // flatpickr("#startDate");
+        flatpickr("#endDate", {dateFormat: "d-m-Y"});
+        // flatpickr("#endDate");
+        flatpickr("#date", {dateFormat: "d-m-Y"});
+        // flatpickr("#date");
+
     </script>
 </body>
 </html>

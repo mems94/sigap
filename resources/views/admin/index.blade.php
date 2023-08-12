@@ -16,7 +16,7 @@
                         <th>Nom</th>
                         <th>login</th>
                         <th>Role</th>
-                        <th>Actions</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -27,8 +27,8 @@
                             <td> {{ $user->role }}</td>
                             <td>
                                 <div class="d-flex gap-2 justify-content-center">
-                                    <a href="#"><i class="bi bi-pencil-fill fs-4 text-primary mx-2"></i></a> 
-                                    <form action="#" method="post" 
+                                    {{-- <a href="#"><i class="bi bi-pencil-fill fs-4 text-primary mx-2"></i></a>  --}}
+                                    <form action="{{ route('delete_user', $user) }}" method="post" 
                                         onsubmit="return  confirm('Voulez-vous vraiment supprimer cet utilisateur ?')">
                                         @csrf
                                         @method('delete')

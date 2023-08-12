@@ -2,14 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Panoscape\History\HasHistories;
+use Panoscape\History\HasOperations;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Employee extends Model
 {
     use HasFactory;
+    use HasHistories;
+
+    public function getModelLabel()
+    {
+        return $this->display_name;
+    }
 
      /**
      * The primary key associated with the table.
@@ -34,24 +44,23 @@ class Employee extends Model
             'contact',
             'gender',
             'lastDegree',
+            'user_id'
     ];
 
-    public function advancement(): HasOne 
+    public function advancements(): HasMany
     {
-        return $this->hasOne(Advancement::class, 'employee_im', 'im');
+        return $this->hasMany(Advancement::class, 'employee_im', 'im');
     }
 
-    public function contract(): HasOne 
+    public function contracts(): HasMany
     {
-        return $this->hasOne(Contract::class, 'employee_im', 'im');
+        // return $this->hasOne(Contract::class, 'employee_im', 'im');
+        return $this->hasMany(Contract::class, 'employee_im', 'im');
     }
 
-
-    // Retourne le path vers l'image 
-    public function imageUrl() : string
+    public function user(): BelongsTo 
     {
-        Storage::disk('public');
-        
-        return Storage::url($this->projectContractFile_path);
+        return $this->belongsTo(User::class);
     }
+
 }

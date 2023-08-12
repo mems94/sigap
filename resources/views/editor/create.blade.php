@@ -19,8 +19,8 @@
                                 @include('include_components.input', ['label' => 'Nom', 'name' => 'lastName', 'value' => $employee->lastName ])
                                 @include('include_components.input', ['label' => 'Prenom', 'name' => 'firstName', 'value' => $employee->firstName ])
                                 @include('include_components.input', ['label' => 'Adresse', 'name' => 'address', 'value' => $employee->address ])
-                                @include('include_components.input', ['label' => 'Contact', 'name' => 'contact', 'value' => $employee->contact ])
-                                @include('include_components.input', ['label' => 'Genre', 'name' => 'gender', 'value' => $employee->gender ])
+                                @include('include_components.input', ['label' => 'Contact', 'name' => 'contact', 'value' => $employee->contact ])            
+                                @include('include_components.select', ['label' => 'Genre', 'name' => 'gender', 'value' => $employee->pluck('gender'), 'options' => $genderOptions ])
                                 @include('include_components.input', ['label' => 'Dernier diplome obtenu', 'name' => 'lastDegree', 'value' => $employee->lastDegree ])
                             </div>    
                         </fieldset>
