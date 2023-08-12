@@ -241,4 +241,10 @@ class EmployeeController extends Controller
     {
         return view('editor.print');
     }
+
+    public function printAll() 
+    {
+        $employees = Employee::with('contracts')->orderBy('created_at', 'desc')->get();
+        return view('editor.print_all',['employees' => $employees]);
+    }
 }

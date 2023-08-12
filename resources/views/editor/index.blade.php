@@ -28,7 +28,7 @@
         </div>
         
         <div>
-            <a href="#" type="button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Imprimer pour tous les employés"><i class="bi bi-printer-fill fs-1 text-primary mx-3"></i></a>
+            <a href="{{ route('editor.print_all') }}" type="button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Imprimer pour tous les employés"><i class="bi bi-printer-fill fs-1 text-primary mx-3"></i></a>
             
             @can('create', Auth::user())
                 <a href="{{ route('editor.employee.create') }}"><i class="bi bi-plus-circle-fill fs-1 text-primary"></i></a>
@@ -110,7 +110,7 @@
                                         <a href="{{ route('editor.employee.edit', $employee) }}"><i class="bi bi-pencil-fill fs-4 text-primary mx-2"></i></a>     
                                     @endcan
                                     
-                                    <a href="#"><i class="bi bi-printer fs-4 text-primary mx-2"></i></a> 
+                                    <a href="{{ route('editor.print') }}"><i class="bi bi-printer fs-4 text-primary mx-2"></i></a> 
                                     
                                     @can('delete', $employee)
                                         <form action="{{ route('editor.employee.destroy', $employee) }}" method="post" 

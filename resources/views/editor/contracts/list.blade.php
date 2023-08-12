@@ -20,7 +20,7 @@
                 @php
                     $data = json_decode($history->meta, true);
                 @endphp
-                
+                @if ($history->meta)
                     <tbody>
                         <tr>
                             <td>{{ $data[0]['old'] }}</td>  
@@ -28,6 +28,9 @@
                             <td>{{ Carbon::parse($history->performed_at)->format('d/m/Y') }}</td>   
                         </tr>
                     </tbody>
+                @else
+                    <h5 class="text-danger">Pas d'historique de modification pour ce contrat</h5>
+                @endif
             @endforeach
         </table>
     </div>

@@ -23,6 +23,7 @@ Route::prefix('editor')->name('editor.')->middleware('auth')->group(function() {
     Route::resource('employee', EmployeeController::class);
     Route::get('/contracts_list/{contract}', [EmployeeController::class, 'listContracts'])->name('contracts.list');
     Route::get('/print', [EmployeeController::class, 'print'])->name('print');
+    Route::get('/print_all', [EmployeeController::class, 'printAll'])->name('print_all');
 });
 
 Auth::routes();
